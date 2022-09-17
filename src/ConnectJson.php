@@ -9,15 +9,20 @@ use hollodotme\FastCGI\SocketConnections\NetworkSocket;
 
 class ConnectJson
 {
-    private $script_file_name;
-    private $hostname;
-    private $port;
+    private string $script_file_name;
+    private string $hostname;
+    private int $port;
+    private object $client;
+    private object $connection;
 
     public function __construct(string $script_file_name, string $hostname, int $port)
     {
         $this->script_file_name = $script_file_name;
         $this->hostname = $hostname;
         $this->port = $port;
+
+        $this->client = new Client;
+        $this->connection = new NetworkSocket($hostname, $port);
     }
 
     public function get(string $url, array $params)
@@ -25,9 +30,7 @@ class ConnectJson
         // set params
         $content = http_build_query($params);
 
-        // set connection
-        $client = new Client();
-        $connection = new NetworkSocket($this->hostname, $this->port);
+        // set request
         $request = new GetRequest($this->script_file_name, $content);
 
         // set http2 protocol
@@ -42,7 +45,7 @@ class ConnectJson
         // set query string params
         $request->setCustomVar('QUERY_STRING', $content);
 
-        $response = $client->sendRequest($connection, $request);
+        $response = $this->client->sendRequest($this->connection, $request);
 
         return $response->getBody();
     }
