@@ -1,0 +1,23 @@
+{
+    "name": "swissfreecommerce/connect",
+    "description": "Simple Http Connection with fast cgi client",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "majid mohammadian",
+            "email": "majeedmohammadian@gmail.com",
+            "role": "Full Stack Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0.2",
+        "ext-json": "*",
+        "hollodotme/fast-cgi-client": "v3.1.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "SwissFreeCommerce\\Connect\\": "src/"
+        }
+    }
+}
