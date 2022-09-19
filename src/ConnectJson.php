@@ -6,6 +6,7 @@ use hollodotme\FastCGI\Client;
 use hollodotme\FastCGI\Requests\GetRequest;
 use hollodotme\FastCGI\Requests\PostRequest;
 use hollodotme\FastCGI\SocketConnections\NetworkSocket;
+use hollodotme\FastCGI\RequestContents\UrlEncodedFormData;
 
 class ConnectJson
 {
@@ -25,10 +26,10 @@ class ConnectJson
         $this->connection = new NetworkSocket($hostname, $port);
     }
 
-    public function get(string $url, array $params)
+    public function get(string $url, array $query_params = [])
     {
         // set params
-        $content = http_build_query($params);
+        $content = http_build_query($query_params);
 
         // set request
         $request = new GetRequest($this->script_file_name, $content);
@@ -44,6 +45,34 @@ class ConnectJson
 
         // set query string params
         $request->setCustomVar('QUERY_STRING', $content);
+
+        $response = $this->client->sendRequest($this->connection, $request);
+
+        return $response->getBody();
+    }
+
+    public function post(string $url, array $params = [], array $query_params = [])
+    {
+        // set params
+        $url_encode_form_data = new UrlEncodedFormData($params);
+
+        $request = PostRequest::newWithRequestContent($this->script_file_name, $url_encode_form_data);
+
+        // set http2 protocol
+        $request->setServerProtocol('HTTP/2.0');
+
+        // set accept json
+        $request->setCustomVar('HTTP_ACCEPT', 'application/json');
+
+        // set request uri
+        $request->setRequestUri($url);
+
+        // set query string params
+        if(!empty($query_params)) {
+            $query_params = http_build_query($query_params);
+
+            $request->setCustomVar('QUERY_STRING', $query_params);
+        }
 
         $response = $this->client->sendRequest($this->connection, $request);
 
