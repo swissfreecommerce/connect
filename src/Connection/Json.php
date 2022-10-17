@@ -1,14 +1,15 @@
 <?php
 
-namespace SwissFreeCommerce\Connect;
+namespace SwissFreeCommerce\Connect\Connection;
 
 use hollodotme\FastCGI\Client;
 use hollodotme\FastCGI\Requests\GetRequest;
 use hollodotme\FastCGI\Requests\PostRequest;
 use hollodotme\FastCGI\SocketConnections\NetworkSocket;
 use hollodotme\FastCGI\RequestContents\UrlEncodedFormData;
+use SwissFreeCommerce\Connect\Response;
 
-class ConnectJson
+class Json
 {
     private string $script_file_name;
     private string $hostname;
