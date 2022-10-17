@@ -26,7 +26,7 @@ class ConnectJson
         $this->connection = new NetworkSocket($hostname, $port);
     }
 
-    public function get(string $url, array $query_params = [])
+    public function get(string $url, array $query_params = [], array $variables = [])
     {
         // set params
         $content = http_build_query($query_params);
@@ -40,6 +40,10 @@ class ConnectJson
         // set accept json
         $request->setCustomVar('HTTP_ACCEPT', 'application/json');
 
+        foreach ($variables as $key => $value) {
+            $request->setCustomVar($key, $value);
+        }
+
         // set request uri
         $request->setRequestUri($url);
 
@@ -48,10 +52,10 @@ class ConnectJson
 
         $response = $this->client->sendRequest($this->connection, $request);
 
-        return $response->getBody();
+        return $this->response($response);
     }
 
-    public function post(string $url, array $params = [], array $query_params = [])
+    public function post(string $url, array $params = [], array $query_params = [], array $variables = [])
     {
         // set params
         $url_encode_form_data = new UrlEncodedFormData($params);
@@ -64,11 +68,15 @@ class ConnectJson
         // set accept json
         $request->setCustomVar('HTTP_ACCEPT', 'application/json');
 
+        foreach ($variables as $key => $value) {
+            $request->setCustomVar($key, $value);
+        }
+
         // set request uri
         $request->setRequestUri($url);
 
         // set query string params
-        if(!empty($query_params)) {
+        if (!empty($query_params)) {
             $query_params = http_build_query($query_params);
 
             $request->setCustomVar('QUERY_STRING', $query_params);
@@ -76,6 +84,19 @@ class ConnectJson
 
         $response = $this->client->sendRequest($this->connection, $request);
 
-        return $response->getBody();
+        return $this->response($response);
+    }
+
+    public function response($response)
+    {
+        $status = 200;
+
+        $get_headers = $response->getHeaders();
+        if (isset($get_headers['Status'][0])) {
+            $status_parts = explode(' ', $get_headers['Status'][0]);
+            $status = (int)$status_parts[0];
+        }
+
+        return (new Response($response->getBody(), $status));
     }
 }
