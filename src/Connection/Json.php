@@ -8,6 +8,7 @@ use hollodotme\FastCGI\Requests\PostRequest;
 use hollodotme\FastCGI\SocketConnections\NetworkSocket;
 use hollodotme\FastCGI\RequestContents\UrlEncodedFormData;
 use SwissFreeCommerce\Connect\Response;
+use hollodotme\FastCGI\Interfaces\ProvidesResponseData;
 
 class Json
 {
@@ -17,6 +18,15 @@ class Json
     private object $client;
     private object $connection;
 
+    /**
+     * Construct Json
+     *
+     * @param string $script_file_name
+     * @param string $hostname
+     * @param int $port
+     *
+     * @return void
+     */
     public function __construct(string $script_file_name, string $hostname, int $port)
     {
         $this->script_file_name = $script_file_name;
@@ -27,7 +37,16 @@ class Json
         $this->connection = new NetworkSocket($hostname, $port);
     }
 
-    public function get(string $url, array $query_params = [], array $variables = [])
+    /**
+     * Get Method
+     *
+     * @param string $url
+     * @param array $query_params
+     * @param array $variables
+     *
+     * @return Response
+     */
+    public function get(string $url, array $query_params = [], array $variables = []): Response
     {
         // set params
         $content = http_build_query($query_params);
@@ -56,6 +75,16 @@ class Json
         return $this->response($response);
     }
 
+    /**
+     * Post Method
+     *
+     * @param string $url
+     * @param array $params
+     * @param array $query_params
+     * @param array $variables
+     *
+     * @return Response
+     */
     public function post(string $url, array $params = [], array $query_params = [], array $variables = [])
     {
         // set params
@@ -88,7 +117,14 @@ class Json
         return $this->response($response);
     }
 
-    public function response($response)
+    /**
+     * Responce information
+     *
+     * @param ProvidesResponseData $response
+     *
+     * @return Response
+     */
+    public function response(ProvidesResponseData $response): Response
     {
         $status = 200;
 
