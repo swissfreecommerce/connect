@@ -1,6 +1,13 @@
 {
     "name": "swissfreecommerce/connect",
     "description": "Simple Http Connection with fast cgi client",
+    "keywords": [
+        "connect",
+        "fastcgi",
+        "php-fpm",
+        "socket",
+        "async"
+    ],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -11,7 +18,7 @@
         }
     ],
     "require": {
-        "php": "^8.0.2",
+        "php": ">=8.0",
         "ext-json": "*",
         "hollodotme/fast-cgi-client": "v3.1.7"
     },

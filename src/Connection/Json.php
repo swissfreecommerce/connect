@@ -5,10 +5,12 @@ namespace SwissFreeCommerce\Connect\Connection;
 use hollodotme\FastCGI\Client;
 use hollodotme\FastCGI\Requests\GetRequest;
 use hollodotme\FastCGI\Requests\PostRequest;
+use hollodotme\FastCGI\Requests\PutRequest;
 use hollodotme\FastCGI\SocketConnections\NetworkSocket;
 use hollodotme\FastCGI\RequestContents\UrlEncodedFormData;
 use SwissFreeCommerce\Connect\Response;
 use hollodotme\FastCGI\Interfaces\ProvidesResponseData;
+use hollodotme\FastCGI\SocketConnections\Defaults;
 
 class Json
 {
@@ -27,14 +29,14 @@ class Json
      *
      * @return void
      */
-    public function __construct(string $script_file_name, string $hostname, int $port)
+    public function __construct(string $script_file_name, string $hostname, int $port, int $connect_timeout = Defaults::CONNECT_TIMEOUT, int $read_write_timeout = Defaults::READ_WRITE_TIMEOUT)
     {
         $this->script_file_name = $script_file_name;
         $this->hostname = $hostname;
         $this->port = $port;
 
         $this->client = new Client;
-        $this->connection = new NetworkSocket($hostname, $port);
+        $this->connection = new NetworkSocket($hostname, $port, $connect_timeout, $read_write_timeout);
     }
 
     /**
@@ -91,6 +93,48 @@ class Json
         $url_encode_form_data = new UrlEncodedFormData($params);
 
         $request = PostRequest::newWithRequestContent($this->script_file_name, $url_encode_form_data);
+
+        // set http2 protocol
+        $request->setServerProtocol('HTTP/2.0');
+
+        // set accept json
+        $request->setCustomVar('HTTP_ACCEPT', 'application/json');
+
+        foreach ($variables as $key => $value) {
+            $request->setCustomVar($key, $value);
+        }
+
+        // set request uri
+        $request->setRequestUri($url);
+
+        // set query string params
+        if (!empty($query_params)) {
+            $query_params = http_build_query($query_params);
+
+            $request->setCustomVar('QUERY_STRING', $query_params);
+        }
+
+        $response = $this->client->sendRequest($this->connection, $request);
+
+        return $this->response($response);
+    }
+
+    /**
+     * Put Method
+     *
+     * @param string $url
+     * @param array $params
+     * @param array $query_params
+     * @param array $variables
+     *
+     * @return Response
+     */
+    public function put(string $url, array $params = [], array $query_params = [], array $variables = [])
+    {
+        // set params
+        $url_encode_form_data = new UrlEncodedFormData($params);
+
+        $request = PutRequest::newWithRequestContent($this->script_file_name, $url_encode_form_data);
 
         // set http2 protocol
         $request->setServerProtocol('HTTP/2.0');
